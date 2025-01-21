@@ -2,17 +2,13 @@ package com.example.lab1
 
 import Question
 import android.os.Bundle
-import android.widget.Button
-import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import com.example.lab1.databinding.ActivityMainBinding
 import androidx.appcompat.app.AppCompatActivity as AppCompatActivity1
 
-
 class MainActivity : AppCompatActivity1() {
     private lateinit var binding: ActivityMainBinding
-
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
@@ -31,13 +27,11 @@ class MainActivity : AppCompatActivity1() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        // Set up button listeners
         binding.trueButton.setOnClickListener {
-                view: View ->
             checkAnswer(true)
         }
         binding.falseButton.setOnClickListener {
-                view: View ->
             checkAnswer(false)
         }
         binding.nextButton.setOnClickListener {
@@ -45,9 +39,16 @@ class MainActivity : AppCompatActivity1() {
             updateQuestion()
         }
 
-        updateQuestion()
+        // Add a listener to TextView
+        binding.questionTextView.setOnClickListener {
+            currentIndex = (currentIndex + 1) % questionBank.size
+            updateQuestion()
+        }
 
+        // Initialize the first question
+        updateQuestion()
     }
+
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         binding.questionTextView.setText(questionTextResId)
