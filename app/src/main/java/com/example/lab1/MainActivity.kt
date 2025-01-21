@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity1() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up button listeners
         binding.trueButton.setOnClickListener {
             checkAnswer(true)
         }
@@ -38,14 +37,15 @@ class MainActivity : AppCompatActivity1() {
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
         }
-
-        // Add a listener to TextView
-        binding.questionTextView.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+        binding.previousButton.setOnClickListener {
+            currentIndex = if (currentIndex - 1 < 0) {
+                questionBank.size - 1
+            } else {
+                currentIndex - 1
+            }
             updateQuestion()
         }
 
-        // Initialize the first question
         updateQuestion()
     }
 
