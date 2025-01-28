@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var answeredQuestions = mutableSetOf<Int>()  // Track answered questions
+    private var correctAnswers = 0  // Count correct answers
     private var currentIndex = 0
 
     // Sample question bank
@@ -94,6 +95,7 @@ class MainActivity : AppCompatActivity() {
 
         val correctAnswer = questionBank[currentIndex].answer
         val messageResId = if (userAnswer == correctAnswer) {
+            correctAnswers++ // Increment correct answers count
             R.string.correct_toast
         } else {
             R.string.incorrect_toast
@@ -108,5 +110,16 @@ class MainActivity : AppCompatActivity() {
         // Disable buttons after answering
         binding.trueButton.isEnabled = false
         binding.falseButton.isEnabled = false
+
+        // Check if all questions have been answered
+        if (answeredQuestions.size == questionBank.size) {
+            showScore()
+        }
+    }
+
+    // Show final quiz score
+    private fun showScore() {
+        val scorePercentage = (correctAnswers.toDouble() / questionBank.size) * 100
+        Toast.makeText(this, "Quiz Completed! Your score: $scorePercentage%", Toast.LENGTH_LONG).show()
     }
 }
