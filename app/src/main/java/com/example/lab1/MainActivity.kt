@@ -6,6 +6,7 @@ import Question
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lab1.databinding.ActivityMainBinding
+import androidx.activity.viewModels
 
 private const val TAG = "MainActivity"
 
@@ -15,8 +16,8 @@ class MainActivity : AppCompatActivity() {
     private var answeredQuestions = mutableSetOf<Int>()  // Track answered questions
     private var correctAnswers = 0  // Count correct answers
     private var currentIndex = 0
+    private val quizViewModel: QuizViewModel by viewModels()
 
-    // Sample question bank
     private val questionBank = listOf(
         Question(R.string.question_text, true),
         Question(R.string.question_oceans, true),
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
+
         // Set up True button listener
         binding.trueButton.setOnClickListener {
             checkAnswer(true)
@@ -44,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set up Next button listener
         binding.nextButton.setOnClickListener {
+            quizViewModel.moveToNext()
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
         }
@@ -79,7 +83,8 @@ class MainActivity : AppCompatActivity() {
 
     // Update the displayed question and re-enable buttons if necessary
     private fun updateQuestion() {
-        val questionTextResId = questionBank[currentIndex].textResId
+//        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         binding.questionTextView.setText(questionTextResId)
 
         // Enable or disable buttons based on whether the question has been answered
@@ -92,8 +97,8 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean) {
         // Prevent re-answering the same question
         if (currentIndex in answeredQuestions) return
-
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
+//        val correctAnswer = questionBank[currentIndex].answer
         val messageResId = if (userAnswer == correctAnswer) {
             correctAnswers++ // Increment correct answers count
             R.string.correct_toast
