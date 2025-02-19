@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 
 private const val TAG = "QuizViewModel"
 const val CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY"
-const val IS_CHEATER_KEY = "IS_CHEATER_KEY"
+const val CHEATED_QUESTIONS_KEY = "CHEATED_QUESTIONS_KEY"
 const val ANSWERED_QUESTIONS_KEY = "ANSWERED_QUESTIONS_KEY"
 const val CORRECT_ANSWERS_KEY = "CORRECT_ANSWERS_KEY"
 
@@ -21,15 +21,10 @@ class QuizViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         Question(R.string.question_asia, true)
     )
 
-    // Track if the user has cheated
-    var isCheater: Boolean
-        get() = savedStateHandle.get(IS_CHEATER_KEY) ?: false
-        set(value) = savedStateHandle.set(IS_CHEATER_KEY, value)
-
-    // Store the index of the current question
-    private var currentIndex: Int
-        get() = savedStateHandle.get(CURRENT_INDEX_KEY) ?: 0
-        set(value) = savedStateHandle.set(CURRENT_INDEX_KEY, value)
+    // Track questions where the user cheated
+    private var cheatedQuestions: MutableSet<Int>
+        get() = savedStateHandle.get<HashSet<Int>>(CHEATED_QUESTIONS_KEY) ?: hashSetOf()
+        set(value) = savedStateHandle.set(CHEATED_QUESTIONS_KEY, value)
 
     // Store answered questions to prevent re-answering
     private var answeredQuestions: MutableSet<Int>
@@ -40,6 +35,11 @@ class QuizViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     var correctAnswers: Int
         get() = savedStateHandle.get(CORRECT_ANSWERS_KEY) ?: 0
         set(value) = savedStateHandle.set(CORRECT_ANSWERS_KEY, value)
+
+    // Store the index of the current question
+    private var currentIndex: Int
+        get() = savedStateHandle.get(CURRENT_INDEX_KEY) ?: 0
+        set(value) = savedStateHandle.set(CURRENT_INDEX_KEY, value)
 
     // Get the current question's correct answer
     val currentQuestionAnswer: Boolean
@@ -54,6 +54,19 @@ class QuizViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         currentIndex = (currentIndex + 1) % questionBank.size
     }
 
+    // Mark that the user has cheated on the current question
+    fun markCheated() {
+        val cheatedQuestions = savedStateHandle.get<HashSet<Int>>(CHEATED_QUESTIONS_KEY) ?: hashSetOf()
+        cheatedQuestions.add(currentIndex)
+        savedStateHandle.set(CHEATED_QUESTIONS_KEY, cheatedQuestions)
+    }
+
+    // Check if the user cheated on the current question
+    fun isCheaterOnCurrentQuestion(): Boolean {
+        val cheatedQuestions = savedStateHandle.get<HashSet<Int>>(CHEATED_QUESTIONS_KEY) ?: hashSetOf()
+        return currentIndex in cheatedQuestions
+    }
+
     // Check if a question has already been answered
     fun isQuestionAnswered(): Boolean {
         return currentIndex in answeredQuestions
@@ -64,6 +77,7 @@ class QuizViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         if (!isQuestionAnswered()) {
             answeredQuestions.add(currentIndex)
             savedStateHandle.set(ANSWERED_QUESTIONS_KEY, answeredQuestions)
+
             if (userAnswer == currentQuestionAnswer) {
                 correctAnswers++
                 savedStateHandle.set(CORRECT_ANSWERS_KEY, correctAnswers)
