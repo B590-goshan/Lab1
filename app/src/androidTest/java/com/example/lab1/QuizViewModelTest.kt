@@ -28,5 +28,5 @@ class QuizViewModelTest {
         println("Current Question Answer: ${quizViewModel.currentQuestionAnswer}")
         assertFalse("Expected answer to be incorrect", quizViewModel.currentQuestionAnswer)
     }
-    
+
 }
